@@ -30,7 +30,6 @@ A high-performance, fault-tolerant backend system for bulk certificate generatio
   - [3. Download Individual Certificate PDF](#3-download-individual-certificate-pdf)
   - [4. Download All Certificates as ZIP](#4-download-all-certificates-as-zip)
   - [5. List Recent Jobs](#5-list-recent-jobs)
-- [Interview & Architectural Q&A](#-interview--architectural-qa)
 
 ---
 
@@ -479,18 +478,3 @@ Downloads an on-demand compressed archive containing all successfully generated 
 
 ---
 
-## 🎯 Interview & Architectural Q&A
-
-### Q1: How does your system handle 10,000 recipients in a single request?
-> **Answer**:
-> 1. Pydantic v2 parses and validates the payload in tens of milliseconds in Rust.
-> 2. The job and recipient stubs are inserted into the database, returning `202 Accepted` immediately so the client HTTP connection never times out.
-> 3. For large loads in production, the worker can chunk the records (e.g. batches of 100) and publish tasks to a Celery/Redis queue where multiple worker processes render certificates concurrently.
-
-### Q2: What happens if the server crashes halfway through processing a job?
-> **Answer**:
-> Because progress is persisted after each item, items generated before the crash are marked `SUCCESS` on disk and in the DB. When recovering, an initialization or retry worker simply queries `SELECT * FROM certificate_items WHERE job_id = ? AND status = 'PENDING'` and resumes where it left off, avoiding duplicate rendering.
-
-### Q3: Why ReportLab instead of generating HTML and converting via Puppeteer / WeasyPrint?
-> **Answer**:
-> Headless browsers consume ~300MB RAM each, take 1–3 seconds per document, and can easily run a server out of memory under bulk loads. ReportLab is a direct vector drawing library that generates a certificate in **~15 milliseconds** with minimal CPU and memory footprint.
