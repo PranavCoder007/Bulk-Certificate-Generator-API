@@ -38,23 +38,23 @@ A high-performance, fault-tolerant backend system for bulk certificate generatio
 
 ```mermaid
 flowchart TD
-    Client([Client / Frontend / User])
-    API[FastAPI API Layer]
-    DB[(SQLite / Relational DB)]
-    Worker[Background Worker / Task Pool]
-    Engine[ReportLab Vector PDF Engine]
-    Storage[(Disk Storage / Media Bucket)]
+    Client["Client / Frontend / User"]
+    API["FastAPI API Layer"]
+    DB[("SQLite Relational DB")]
+    Worker["Background Worker Pool"]
+    Engine["ReportLab Vector PDF Engine"]
+    Storage[("Disk Storage / Media")]
 
-    Client -->|1. POST /api/v1/jobs (Bulk)| API
-    API -->|2. Insert Job & Recipient Items| DB
-    API -->|3. Return 202 Accepted + job_id| Client
-    API -.->|4. Enqueue Job in Background| Worker
-    Worker -->|5. Fetch Pending Items| DB
-    Worker -->|6. Render Vector PDF per recipient| Engine
-    Engine -->|7. Write PDF| Storage
-    Worker -->|8. Update Progress & Errors atomically| DB
-    Client -->|9. GET /api/v1/jobs/:id (Poll Progress)| API
-    Client -->|10. GET /api/v1/jobs/:id/download (Bulk ZIP)| API
+    Client -->|"1. POST /api/v1/jobs (Bulk)"| API
+    API -->|"2. Insert Job and Items"| DB
+    API -->|"3. Return 202 Accepted + job_id"| Client
+    API -.->|"4. Enqueue Job in Background"| Worker
+    Worker -->|"5. Fetch Pending Items"| DB
+    Worker -->|"6. Render Vector PDF per recipient"| Engine
+    Engine -->|"7. Write PDF"| Storage
+    Worker -->|"8. Update Progress atomically"| DB
+    Client -->|"9. GET /api/v1/jobs/:id (Poll Status)"| API
+    Client -->|"10. GET /api/v1/jobs/:id/download (Bulk ZIP)"| API
 ```
 
 ---
